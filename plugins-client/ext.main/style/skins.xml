@@ -270,7 +270,7 @@
             cursor: default;
         }
         .c9-mbar-round {
-            background : url(images/c9-no-repeat.png) no-repeat 0 0;
+            /*background : url(images/c9-no-repeat.png) no-repeat 0 0;*/
             height: 37px;
             pointer-events: none;
             position: fixed;
@@ -280,7 +280,7 @@
             z-index: 999;
         }
         .c9-mbar-round .mainlogo {
-            background: url("images/c9-no-repeat.png") no-repeat 0 -44px;
+            /*background: url("images/c9-no-repeat.png") no-repeat 0 -44px;*/
             display: block;
             height: 26px;
             left: 33px;
@@ -291,7 +291,7 @@
             width: 37px;
         }
        .updateAvailable .c9-mbar-round .mainlogo {
-           background: url("images/c9-no-repeat.png") no-repeat -96px -44px;
+           /*background: url("images/c9-no-repeat.png") no-repeat -96px -44px;*/
            cursor: pointer;
        }
 
@@ -305,10 +305,10 @@
         .c9-menu-bar .c9-mbar-bcont .c9-activity {
         	background : url(images/c9-no-repeat.png) no-repeat -84px 0;
         	height: 10px;
-        	left: 24px;
+        	left: 50px;
             pointer-events: all;
         	position: absolute;
-        	top: 4px;
+        	top: 12px;
         	width: 10px;
         }
         .c9-menu-bar .c9-mbar-bcont .c9-activity .light {
