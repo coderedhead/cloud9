@@ -24,10 +24,10 @@ var fsUrl = "/workspace";
 var vfsUrl = "/vfs";
 
 var port = argv.p || process.env.PORT || 3131;
-var host = argv.l || process.env.IP || "localhost";
+var host = argv.l || process.env.IP || "0.0.0.0";
 var debugPort = argv.b || process.env.DEBUG_PORT || 5858;
 
-var useAuth = argv.username && argv.password;
+//var useAuth = argv.username && argv.password;
 
 var config = [
     {
@@ -230,12 +230,15 @@ var config = [
     "./cloud9.ide.watcher"
 ];
 
-if (useAuth) {
-    config.push({
-        packagePath: "./cloud9.connect.basic-auth",
-        username: argv.username,
-        password: argv.password
-    });
+config.push({
+    packagePath: "./cloud9.seedup",
+    appId:process.env.WORKSPACE_HOOK_TOKEN,
+    authUrl:process.env.WORKSPACE_HOOK_AUTH
+});
+
+process.seedup = {
+    appId:process.env.WORKSPACE_HOOK_TOKEN,
+    authUrl:process.env.WORKSPACE_HOOK_AUTH
 }
 
 module.exports = config;

@@ -69,7 +69,7 @@ util.inherits(Ide, EventEmitter);
 (function () {
 
     this.init = function(exts) {
-        this.workspace.createPlugins(exts);
+
         var statePlugin = this.workspace.getExt("state");
         if (statePlugin) {
             statePlugin.on("statechange", function(state) {
@@ -87,82 +87,129 @@ util.inherits(Ide, EventEmitter);
     };
 
     this.$serveIndex = function(req, res, next) {
-        res.writeHead(200, {
-            "cache-control": "no-transform",
-            "Content-Type": "text/html"
-        });
+        var that = this;
+        var complete = function(success) {
+            if (success) {
+                res.writeHead(200, {
+                    "cache-control": "no-transform",
+                    "Content-Type": "text/html"
+                });
+            } else {
+                res.writeHead(302, {
+                  'Location': 'https://seedup.io/signin'
+                });
+                res.end();
+            }
 
-        var permissions = this.getPermissions(req);
-        var plugins = c9util.arrayToMap(this.options.plugins);
-        var bundledPlugins = c9util.arrayToMap(this.options.bundledPlugins);
+            var permissions = that.getPermissions(req);
+            var plugins = c9util.arrayToMap(that.options.plugins);
+            var bundledPlugins = c9util.arrayToMap(that.options.bundledPlugins);
 
-        var client_exclude = c9util.arrayToMap(permissions.client_exclude.split("|"));
-        for (var plugin in client_exclude)
-            delete plugins[plugin];
+            var client_exclude = c9util.arrayToMap(permissions.client_exclude.split("|"));
+            for (var plugin in client_exclude)
+                delete plugins[plugin];
 
-        // TODO: Exclude applicable bundledPlugins
+            // TODO: Exclude applicable bundledPlugins
 
-        var client_include = c9util.arrayToMap((permissions.client_include || "").split("|"));
-        for (var plugin in client_include) {
-            if (plugin)
-                plugins[plugin] = 1;
-        }
+            var client_include = c9util.arrayToMap((permissions.client_include || "").split("|"));
+            for (var plugin in client_include) {
+                if (plugin)
+                    plugins[plugin] = 1;
+            }
 
-        var staticUrl = this.options.staticUrl;
-        var workerUrl = this.options.workerUrl;
-        var aceScripts = '<script type="text/javascript" data-ace-worker-path="/static/js/worker" src="'
-            + staticUrl + '/ace/build/ace'
-            + (this.options.debug ? "-uncompressed" : "") + '.js"></script>\n';
+            var staticUrl = that.options.staticUrl;
+            var workerUrl = that.options.workerUrl;
+            var aceScripts = '<script type="text/javascript" data-ace-worker-path="/static/js/worker" src="'
+                + staticUrl + '/ace/build/ace'
+                + (that.options.debug ? "-uncompressed" : "") + '.js"></script>\n';
 
-        var loadedDetectionScript = "";
-        if (this.options.local) {
-            loadedDetectionScript = '<script type="text/javascript" src="/c9local/ui/connected.js?workspaceId=' +
-                this.options.workspaceId + '"></script>';
-        }
+            var loadedDetectionScript = "";
+            if (that.options.local) {
+                loadedDetectionScript = '<script type="text/javascript" src="/c9local/ui/connected.js?workspaceId=' +
+                    that.options.workspaceId + '"></script>';
+            }
 
-        var replacements = {
-            davPrefix: this.options.davPrefix,
-            workspaceDir: this.options.workspaceDir,
-            debug: this.options.debug,
-            workerUrl: workerUrl,
-            staticUrl: staticUrl,
-            smithIo: JSON.stringify(this.options.smithIo),
-            sessionId: req.sessionID, // set by connect
-            uid: req.session.uid || req.session.anonid || 0,
-            pid: this.options.pid || process.pid || 0,
-            workspaceId: this.options.workspaceId,
-            plugins: Object.keys(plugins),
-            bundledPlugins: Object.keys(bundledPlugins),
-            readonly: (permissions.fs !== "rw"),
-            requirejsConfig: this.options.requirejsConfig,
-            settingsXml: "",
-            runners: this.options.runners,
-            scripts: (this.options.debug || this.options.packed) ? "" : aceScripts,
-            projectName: this.options.projectName,
-            version: this.options.version,
-            hosted: this.options.hosted.toString(),
-            env: this.options.env || "local",
-            packed: this.options.packed,
-            packedName: this.options.packedName,
-            local: this.options.local,
-            loadedDetectionScript: loadedDetectionScript,
-            _csrf: req.session && req.session._csrf || ""
-        };
+            var replacements = {
+                davPrefix: that.options.davPrefix,
+                workspaceDir: that.options.workspaceDir,
+                debug: that.options.debug,
+                workerUrl: workerUrl,
+                staticUrl: staticUrl,
+                smithIo: JSON.stringify(that.options.smithIo),
+                sessionId: req.sessionID, // set by connect
+                uid: req.session.uid || req.session.anonid || 0,
+                pid: that.options.pid || process.pid || 0,
+                workspaceId: that.options.workspaceId,
+                plugins: Object.keys(plugins),
+                bundledPlugins: Object.keys(bundledPlugins),
+                readonly: (permissions.fs !== "rw"),
+                requirejsConfig: that.options.requirejsConfig,
+                settingsXml: "",
+                runners: that.options.runners,
+                scripts: (that.options.debug || that.options.packed) ? "" : aceScripts,
+                projectName: that.options.projectName,
+                version: that.options.version,
+                hosted: that.options.hosted.toString(),
+                env: that.options.env || "local",
+                packed: that.options.packed,
+                packedName: that.options.packedName,
+                local: that.options.local,
+                loadedDetectionScript: loadedDetectionScript,
+                _csrf: req.session && req.session._csrf || ""
+            };
 
-        var settingsPlugin = this.workspace.getExt("settings");
-        var user = this.getUser(req);
+            var settingsPlugin = that.workspace.getExt("settings");
+            var user = that.getUser(req);
 
-        if (!settingsPlugin || !user) {
-            var index = template.fill(INDEX_TMPL, replacements);
-            res.end(index);
-        }
-        else {
-            settingsPlugin.loadSettings(user, function(err, settings) {
-                replacements.settingsXml = err || !settings ? "defaults" : settings.replace(/]]>/g, '&#093;&#093;&gt;');
+            if (!settingsPlugin || !user) {
                 var index = template.fill(INDEX_TMPL, replacements);
                 res.end(index);
-            });
+            }
+            else {
+                settingsPlugin.loadSettings(user, function(err, settings) {
+                    replacements.settingsXml = err || !settings ? "defaults" : settings.replace(/]]>/g, '&#093;&#093;&gt;');
+                    var index = template.fill(INDEX_TMPL, replacements);
+                    res.end(index);
+                });
+            }
         }
+
+
+        if (req.query && req.query.e && req.query.t) {
+            var request = require("request");
+            request.post({
+                "url": process.seedup.authUrl,
+                "headers": {
+                    'authorization': process.seedup.appId
+                },
+                "form": {
+                  "data": {
+                    "token":req.query.t,
+                    "email":req.query.e
+                  }       
+                }
+              }, function(err, r, body) {
+                if(err) {
+                    console.log(err);
+                    complete(false);
+                } else {
+                    var data = JSON.parse(body);
+                    console.log(data);
+                    if (data.token && 
+                        data.token == req.query.t &&
+                        data.email == req.query.e) {
+                        console.log('success',data);
+                        complete(true);
+                    } else {
+                        complete(false);
+                    }
+                }
+            });
+        } else {
+            complete(false);
+        }
+
+        
     };
 
     this.addUser = function(username, permissions, userData) {

@@ -1,0 +1,18 @@
+{
+    "name": "cloud9.ide.run-android",
+    "version": "0.0.1",
+
+    "main": "./run-android.js",
+    "private": true,
+
+    "plugin": {
+        "consumes": [
+            "ide",
+            "process-manager",
+            "run-android",
+            "run-node-debug",
+            "ide.ext.state",
+            "eventbus"
+        ]
+    }
+}

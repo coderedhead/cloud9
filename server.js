@@ -119,3 +119,5 @@ function boot() {
 	   console.log("Started '%s'!", configPath);
 	});
 }
+
+process.on('uncaughtException', function(err) {console.log('Uncaught exception'); return console.log(err);});
