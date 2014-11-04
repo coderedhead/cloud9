@@ -22,7 +22,7 @@ var theme = require("text!ext/console/themes/arthur.css");
 var inputHistory = require("ext/console/input_history");
 var anims = require("ext/anims/anims");
 var preview = require("ext/preview/preview");
-
+require('apf/elements/codeeditor');
 // Some constants used throughout the plugin
 var KEY_TAB = 9, KEY_CR = 13, KEY_UP = 38, KEY_ESC = 27, KEY_DOWN = 40;
 var actionCodes = [KEY_TAB, KEY_CR, KEY_UP, KEY_ESC, KEY_DOWN];
