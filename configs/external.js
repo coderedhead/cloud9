@@ -19,7 +19,8 @@ for (var i = 0; i < clientDirs.length; i++) {
     clientExtensions[name] = __dirname + "/../plugins-client/" + dir;
 }
 
-var projectDir = (argv.w && path.resolve(process.cwd(), argv.w)) || process.cwd();
+var projectDir = process.env.WORKSPACE_DIR;
+//(argv.w && path.resolve(process.cwd(), argv.w)) || process.cwd();
 var fsUrl = "/workspace";
 var vfsUrl = "/vfs";
 
